@@ -177,67 +177,68 @@ select.inp{appearance:none}
     <!-- DATOS DEL MOTOR -->
     <div class="isec">
       <div class="ist"><div class="dot-r"></div>Datos del Motor</div>
-      <div class="igrid">
-        <div class="iw">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+        <div>
           <div class="il">Tipo de fase</div>
           <div style="display:flex;gap:6px;margin-top:4px">
             <button id="en-bt-tri" class="tb on" onclick="setEnFase('tri')" style="flex:1;font-size:10px">Trifásico</button>
             <button id="en-bt-mono" class="tb" onclick="setEnFase('mono')" style="flex:1;font-size:10px">Monofásico</button>
           </div>
         </div>
-        <div class="iw">
+        <div>
           <div class="il">Tensión (V) <span>*</span></div>
-          <select class="inp" id="en-tension">
+          <select class="inp" id="en-tension" style="width:100%">
             <option value="440" selected>440 V — Trifásico Colombia</option>
             <option value="220">220 V — Trifásico / Monofásico</option>
             <option value="110">110 V — Monofásico</option>
           </select>
         </div>
-        <div class="iw">
-          <div class="il">FLA — Corriente placa (A) <span>*</span></div>
-          <input class="inp" id="en-fla" type="number" inputmode="decimal" placeholder="ej: 9.0" min="0.1" step="0.1">
-        </div>
-        <div class="iw">
-          <div class="il">Factor de Potencia cos(φ)</div>
-          <input class="inp" id="en-fp" type="number" inputmode="decimal" placeholder="def: 0.85" min="0.5" max="1" step="0.01" value="0.85">
-          <div style="margin-top:4px;padding:5px 8px;background:rgba(255,183,3,0.07);border-left:2px solid var(--acc);border-radius:4px;font-size:8px;color:var(--mut);line-height:1.5">
-            <b style="color:var(--acc)">ⓘ</b> Plena carga: <b style="color:var(--txt)">0.85</b> · Media carga: <b style="color:var(--txt)">0.75</b> · En vacío: <b style="color:var(--txt)">0.40</b>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <div class="il">FLA — Corriente placa (A) <span>*</span></div>
+            <input class="inp" id="en-fla" type="number" inputmode="decimal" placeholder="ej: 9.0" min="0.1" step="0.1" style="width:100%">
+          </div>
+          <div>
+            <div class="il">Factor de Potencia cos(φ)</div>
+            <input class="inp" id="en-fp" type="number" inputmode="decimal" placeholder="def: 0.85" min="0.5" max="1" step="0.01" value="0.85" style="width:100%">
           </div>
         </div>
-        <div class="iw">
-          <div class="il">Eficiencia del motor (%)</div>
-          <input class="inp" id="en-eff" type="number" inputmode="decimal" placeholder="def: 90" min="50" max="99" step="0.5" value="90">
-          <div style="margin-top:4px;padding:5px 8px;background:rgba(74,144,217,0.07);border-left:2px solid #4A90D9;border-radius:4px;font-size:8px;color:var(--mut);line-height:1.5">
-            <b style="color:#4A90D9">ⓘ</b> IE1: <b style="color:var(--txt)">85–88%</b> · IE2: <b style="color:var(--txt)">88–91%</b> · IE3: <b style="color:var(--txt)">91–94%</b>
+        <div style="padding:6px 9px;background:rgba(255,183,3,0.07);border-left:2px solid var(--acc);border-radius:4px;font-size:8px;color:var(--mut);line-height:1.6">
+          <b style="color:var(--acc)">ⓘ cos(φ):</b> Plena carga: <b style="color:var(--txt)">0.85</b> · Media carga: <b style="color:var(--txt)">0.75</b> · En vacío: <b style="color:var(--txt)">0.40</b>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <div class="il">Eficiencia (%)</div>
+            <input class="inp" id="en-eff" type="number" inputmode="decimal" placeholder="def: 90" min="50" max="99" step="0.5" value="90" style="width:100%">
+          </div>
+          <div>
+            <div class="il">% de carga</div>
+            <input class="inp" id="en-carga" type="number" inputmode="decimal" placeholder="def: 100" min="10" max="150" step="5" value="100" style="width:100%">
           </div>
         </div>
-        <div class="iw">
-          <div class="il">% de carga del motor</div>
-          <input class="inp" id="en-carga" type="number" inputmode="decimal" placeholder="def: 100" min="10" max="100" step="5" value="100">
-          <div style="margin-top:4px;padding:5px 8px;background:rgba(46,196,182,0.07);border-left:2px solid var(--grn);border-radius:4px;font-size:8px;color:var(--mut);line-height:1.5">
-            <b style="color:var(--grn)">ⓘ</b> Motor a plena carga = <b style="color:var(--txt)">100%</b> · Bombeo variable ≈ <b style="color:var(--txt)">75%</b>
+        <div style="padding:6px 9px;background:rgba(74,144,217,0.07);border-left:2px solid #4A90D9;border-radius:4px;font-size:8px;color:var(--mut);line-height:1.6">
+          <b style="color:#4A90D9">ⓘ Eficiencia:</b> IE1: <b style="color:var(--txt)">85–88%</b> · IE2: <b style="color:var(--txt)">88–91%</b> · IE3: <b style="color:var(--txt)">91–94%</b> &nbsp;|&nbsp; <b style="color:var(--grn)">% carga:</b> Plena carga = <b style="color:var(--txt)">100%</b> · Bombeo ≈ <b style="color:var(--txt)">75%</b>
+        </div>
+        <!-- MINI CALCULADORA PINZA (columna completa) -->
+        <div style="background:rgba(74,144,217,0.06);border:1px solid rgba(74,144,217,0.2);border-radius:8px;padding:11px 12px">
+          <div style="font-size:9px;font-weight:600;color:#4A90D9;margin-bottom:8px">🔌 Calcular % de carga desde pinza amperimétrica</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <div style="font-size:9px;color:var(--mut);white-space:nowrap">I medida</div>
+            <input id="en-pinza" type="number" inputmode="decimal" placeholder="ej: 7.2" min="0.1" step="0.1"
+              style="flex:1;background:#0D1B2A;border:1px solid rgba(143,163,180,.25);border-radius:6px;padding:7px 10px;font-size:13px;color:var(--txt);font-family:'Space Grotesk',sans-serif;outline:none"
+              oninput="calcCargaPinza()">
+            <div style="font-size:9px;color:var(--mut);white-space:nowrap">A</div>
           </div>
-          <!-- MINI CALCULADORA PINZA -->
-          <div style="margin-top:8px;background:rgba(74,144,217,0.06);border:1px solid rgba(74,144,217,0.2);border-radius:8px;padding:9px 10px">
-            <div style="font-size:8.5px;font-weight:600;color:#4A90D9;margin-bottom:7px">🔌 Calcular desde pinza amperimétrica</div>
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-              <div style="font-size:8px;color:var(--mut);white-space:nowrap">I medida (A)</div>
-              <input id="en-pinza" type="number" inputmode="decimal" placeholder="ej: 7.2" min="0.1" step="0.1"
-                style="flex:1;background:#0D1B2A;border:1px solid rgba(143,163,180,.25);border-radius:6px;padding:5px 8px;font-size:11px;color:var(--txt);font-family:'Space Grotesk',sans-serif;outline:none"
-                oninput="calcCargaPinza()">
-              <div style="font-size:8px;color:var(--mut);white-space:nowrap">A</div>
-            </div>
-            <div id="en-pinza-result" style="display:none;padding:5px 8px;background:rgba(74,144,217,0.12);border-radius:6px">
-              <div style="font-size:8px;color:var(--mut)">% de carga calculado</div>
-              <div style="font-size:16px;font-weight:700;color:#4A90D9" id="en-pinza-pct">—</div>
-              <div style="font-size:8px;color:var(--mut)" id="en-pinza-desc">—</div>
-              <button onclick="aplicarCargaPinza()" style="margin-top:5px;width:100%;padding:5px;background:rgba(74,144,217,0.2);border:1px solid rgba(74,144,217,0.4);border-radius:6px;color:#4A90D9;font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:600;cursor:pointer">
-                ✓ Aplicar este valor al campo % carga
-              </button>
-            </div>
-            <div style="font-size:7.5px;color:var(--mut);margin-top:5px;line-height:1.5">
-              Ingresa la corriente que lees en tu pinza amperimétrica — el % se calcula automáticamente usando el FLA de la placa ingresado arriba.
-            </div>
+          <div id="en-pinza-result" style="display:none;padding:8px 10px;background:rgba(74,144,217,0.12);border-radius:6px;margin-bottom:6px">
+            <div style="font-size:8px;color:var(--mut);margin-bottom:2px">% de carga calculado</div>
+            <div style="font-size:22px;font-weight:700;color:#4A90D9" id="en-pinza-pct">—</div>
+            <div style="font-size:9px;color:var(--mut);margin-top:2px;line-height:1.5" id="en-pinza-desc">—</div>
+            <button onclick="aplicarCargaPinza()" style="margin-top:8px;width:100%;padding:8px;background:rgba(74,144,217,0.2);border:1px solid rgba(74,144,217,0.4);border-radius:7px;color:#4A90D9;font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:600;cursor:pointer">
+              ✓ Aplicar este valor al campo % de carga
+            </button>
+          </div>
+          <div style="font-size:8px;color:var(--mut);line-height:1.5">
+            Ingresa la corriente que lees con tu pinza — el % se calcula automáticamente con el FLA ingresado arriba.
           </div>
         </div>
       </div>
@@ -246,25 +247,27 @@ select.inp{appearance:none}
     <!-- DATOS DE OPERACIÓN -->
     <div class="isec">
       <div class="ist"><div class="dot-g"></div>Datos de Operación</div>
-      <div class="igrid">
-        <div class="iw">
-          <div class="il">Horas de trabajo por día <span>*</span></div>
-          <input class="inp" id="en-horas" type="number" inputmode="decimal" placeholder="ej: 8" min="0.5" max="24" step="0.5">
-        </div>
-        <div class="iw">
-          <div class="il">Días de trabajo por mes</div>
-          <input class="inp" id="en-dias" type="number" inputmode="decimal" placeholder="def: 26" min="1" max="31" step="1" value="26">
-        </div>
-        <div class="iw full">
-          <div class="il">Tarifa energía ($/kWh) <span style="font-size:8px;color:var(--mut);font-weight:400">· opcional</span></div>
-          <input class="inp" id="en-tarifa" type="number" inputmode="decimal" placeholder="ej: 850" min="100" step="10">
-          <div style="margin-top:4px;padding:5px 8px;background:rgba(232,64,12,0.07);border-left:2px solid var(--pr);border-radius:4px;font-size:8px;color:var(--mut);line-height:1.5">
-            <b style="color:var(--pr)">ⓘ Tarifas Colombia 2024 (referencia):</b> Industrial M: <b style="color:var(--txt)">~620 $/kWh</b> · Industrial G: <b style="color:var(--txt)">~580 $/kWh</b> · Comercial: <b style="color:var(--txt)">~750 $/kWh</b> · Revisa tu factura para el valor exacto.
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <div class="il">Horas / día <span>*</span></div>
+            <input class="inp" id="en-horas" type="number" inputmode="decimal" placeholder="ej: 8" min="0.5" max="24" step="0.5" style="width:100%">
+          </div>
+          <div>
+            <div class="il">Días / mes</div>
+            <input class="inp" id="en-dias" type="number" inputmode="decimal" placeholder="def: 26" min="1" max="31" step="1" value="26" style="width:100%">
           </div>
         </div>
-        <div class="iw full">
+        <div>
+          <div class="il">Tarifa energía ($/kWh) <span style="font-size:8px;color:var(--mut);font-weight:400">· opcional</span></div>
+          <input class="inp" id="en-tarifa" type="number" inputmode="decimal" placeholder="ej: 850" min="100" step="10" style="width:100%">
+          <div style="margin-top:4px;padding:6px 9px;background:rgba(232,64,12,0.07);border-left:2px solid var(--pr);border-radius:4px;font-size:8px;color:var(--mut);line-height:1.6">
+            <b style="color:var(--pr)">ⓘ Tarifas Colombia 2024:</b> Industrial M: <b style="color:var(--txt)">~620 $/kWh</b> · Industrial G: <b style="color:var(--txt)">~580 $/kWh</b> · Comercial: <b style="color:var(--txt)">~750 $/kWh</b><br>Revisa tu factura para el valor exacto.
+          </div>
+        </div>
+        <div>
           <div class="il">Nombre del equipo <span style="font-size:8px;color:var(--mut);font-weight:400">· opcional</span></div>
-          <input class="inp" id="en-nombre" type="text" placeholder="ej: Bomba #1, Compresor, Ventilador">
+          <input class="inp" id="en-nombre" type="text" placeholder="ej: Bomba #1, Compresor, Ventilador" style="width:100%">
         </div>
       </div>
     </div>
