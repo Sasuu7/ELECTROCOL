@@ -200,12 +200,24 @@ select.inp{appearance:none}
           </div>
           <div>
             <div class="il">Factor de Potencia cos(φ)</div>
-            <input class="inp" id="en-fp" type="number" inputmode="decimal" placeholder="def: 0.85" min="0.5" max="1" step="0.01" value="0.85" style="width:100%">
+            <select class="inp" id="en-fp-sel" style="width:100%" onchange="selFp(this.value)">
+              <option value="0.85" selected>Motor genérico — 0.85</option>
+              <option value="0.82">Bomba residencial/rural — 0.82</option>
+              <option value="0.87">Bomba centrífuga industrial — 0.87</option>
+              <option value="0.88">Compresor de tornillo — 0.88</option>
+              <option value="0.83">Compresor de pistón — 0.83</option>
+              <option value="0.82">Ventilador industrial — 0.82</option>
+              <option value="0.75">Motor a media carga — 0.75</option>
+              <option value="0.40">Motor en vacío — 0.40</option>
+              <option value="custom">Personalizado — ingresar manualmente</option>
+            </select>
+            <input class="inp" id="en-fp" type="number" inputmode="decimal" placeholder="ej: 0.85" min="0.3" max="1" step="0.01" value="0.85" style="width:100%;margin-top:5px;display:none">
           </div>
         </div>
         <div style="padding:6px 9px;background:rgba(255,183,3,0.07);border-left:2px solid var(--acc);border-radius:4px;font-size:8px;color:var(--mut);line-height:1.6">
-          <b style="color:var(--acc)">ⓘ cos(φ):</b> Plena carga: <b style="color:var(--txt)">0.85</b> · Media carga: <b style="color:var(--txt)">0.75</b> · En vacío: <b style="color:var(--txt)">0.40</b>
+          <b style="color:var(--acc)">ⓘ cos(φ):</b> Si tienes el dato exacto en la placa selecciona <b style="color:var(--txt)">Personalizado</b> e ingrésalo. Si no, elige el tipo de equipo más parecido.
         </div>
+
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div>
             <div class="il">Eficiencia (%)</div>
@@ -217,7 +229,47 @@ select.inp{appearance:none}
           </div>
         </div>
         <div style="padding:6px 9px;background:rgba(74,144,217,0.07);border-left:2px solid #4A90D9;border-radius:4px;font-size:8px;color:var(--mut);line-height:1.6">
-          <b style="color:#4A90D9">ⓘ Eficiencia:</b> IE1: <b style="color:var(--txt)">85–88%</b> · IE2: <b style="color:var(--txt)">88–91%</b> · IE3: <b style="color:var(--txt)">91–94%</b> &nbsp;|&nbsp; <b style="color:var(--grn)">% carga:</b> Plena carga = <b style="color:var(--txt)">100%</b> · Bombeo ≈ <b style="color:var(--txt)">75%</b>
+          <b style="color:#4A90D9">ⓘ</b> <b style="color:var(--grn)">% carga:</b> Plena carga = <b style="color:var(--txt)">100%</b> · Bombeo variable ≈ <b style="color:var(--txt)">75%</b> · En vacío ≈ <b style="color:var(--txt)">20%</b>
+        </div>
+
+        <!-- CALCULADORA DE EFICIENCIA — MEDICIÓN -->
+        <div style="background:rgba(46,196,182,0.05);border:1px solid rgba(46,196,182,0.25);border-radius:10px;padding:12px">
+          <div style="font-size:9px;font-weight:600;color:var(--grn);margin-bottom:8px">⚙ Calcular eficiencia si no tienes la placa</div>
+          <div style="font-size:8px;color:var(--mut);margin-bottom:10px;line-height:1.5">Mide con tu <b style="color:var(--txt)">pinza amperimétrica y voltímetro</b> la potencia eléctrica real que consume el motor.</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px">
+            <div>
+              <div style="font-size:8px;color:var(--mut);margin-bottom:3px">Potencia nominal (HP) — de la placa</div>
+              <input id="eff-med-hp" type="number" inputmode="decimal" placeholder="ej: 5" min="0.5" step="0.5"
+                style="width:100%;background:#0D1B2A;border:1px solid rgba(143,163,180,.25);border-radius:6px;padding:8px 10px;font-size:13px;color:var(--txt);font-family:'Space Grotesk',sans-serif;outline:none"
+                oninput="calcEffMed()">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div>
+                <div style="font-size:8px;color:var(--mut);margin-bottom:3px">Tensión medida (V)</div>
+                <input id="eff-med-v" type="number" inputmode="decimal" placeholder="ej: 440" min="100"
+                  style="width:100%;background:#0D1B2A;border:1px solid rgba(143,163,180,.25);border-radius:6px;padding:8px 8px;font-size:13px;color:var(--txt);font-family:'Space Grotesk',sans-serif;outline:none"
+                  oninput="calcEffMed()">
+              </div>
+              <div>
+                <div style="font-size:8px;color:var(--mut);margin-bottom:3px">Corriente medida (A)</div>
+                <input id="eff-med-i" type="number" inputmode="decimal" placeholder="ej: 9.0" min="0.1"
+                  style="width:100%;background:#0D1B2A;border:1px solid rgba(143,163,180,.25);border-radius:6px;padding:8px 8px;font-size:13px;color:var(--txt);font-family:'Space Grotesk',sans-serif;outline:none"
+                  oninput="calcEffMed()">
+              </div>
+            </div>
+            <div>
+              <div style="font-size:8px;color:var(--mut);margin-bottom:3px">cos(φ) factor de potencia</div>
+              <input id="eff-med-fp" type="number" inputmode="decimal" placeholder="def: 0.85" min="0.4" max="1" step="0.01" value="0.85"
+                style="width:100%;background:#0D1B2A;border:1px solid rgba(143,163,180,.25);border-radius:6px;padding:8px 10px;font-size:13px;color:var(--txt);font-family:'Space Grotesk',sans-serif;outline:none"
+                oninput="calcEffMed()">
+            </div>
+          </div>
+          <div id="eff-med-result" style="display:none;padding:8px 10px;background:rgba(46,196,182,0.1);border-radius:7px;margin-bottom:7px">
+            <div style="font-size:8px;color:var(--mut)">Eficiencia calculada por medición</div>
+            <div style="font-size:22px;font-weight:700;color:var(--grn)" id="eff-med-val">—</div>
+            <div style="font-size:8px;color:var(--mut);margin-top:2px;line-height:1.5" id="eff-med-desc">—</div>
+            <button onclick="aplicarEff('med')" style="margin-top:7px;width:100%;padding:8px;background:rgba(46,196,182,0.2);border:1px solid rgba(46,196,182,0.4);border-radius:6px;color:var(--grn);font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:600;cursor:pointer">✓ Aplicar al campo Eficiencia</button>
+          </div>
         </div>
         <!-- MINI CALCULADORA PINZA (columna completa) -->
         <div style="background:rgba(74,144,217,0.06);border:1px solid rgba(74,144,217,0.2);border-radius:8px;padding:11px 12px">
@@ -250,13 +302,27 @@ select.inp{appearance:none}
       <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div>
-            <div class="il">Horas / día <span>*</span></div>
-            <input class="inp" id="en-horas" type="number" inputmode="decimal" placeholder="ej: 8" min="0.5" max="24" step="0.5" style="width:100%">
+            <div class="il">Tiempo encendido <span>*</span></div>
+            <div style="position:relative">
+              <input class="inp" id="en-horas" type="number" inputmode="decimal" placeholder="ej: 8" min="0.5" max="24" step="0.5" style="width:100%;padding-right:40px">
+              <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--grn);font-weight:600;pointer-events:none">h/día</span>
+            </div>
+            <div style="margin-top:3px;font-size:8px;color:var(--mut)">¿Cuántas <b style="color:var(--txt)">horas por día</b> está encendido?</div>
           </div>
           <div>
-            <div class="il">Días / mes</div>
-            <input class="inp" id="en-dias" type="number" inputmode="decimal" placeholder="def: 26" min="1" max="31" step="1" value="26" style="width:100%">
+            <div class="il">Días que trabaja</div>
+            <div style="position:relative">
+              <input class="inp" id="en-dias" type="number" inputmode="decimal" placeholder="def: 26" min="1" max="31" step="1" value="26" style="width:100%;padding-right:52px">
+              <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--grn);font-weight:600;pointer-events:none">días/mes</span>
+            </div>
+            <div style="margin-top:3px;font-size:8px;color:var(--mut)">¿Cuántos <b style="color:var(--txt)">días al mes</b> opera?</div>
           </div>
+        </div>
+        <div style="padding:6px 9px;background:rgba(46,196,182,0.07);border-left:2px solid var(--grn);border-radius:4px;font-size:8px;color:var(--mut);line-height:1.7">
+          <b style="color:var(--grn)">ⓘ Ejemplos:</b>
+          Jornada normal = <b style="color:var(--txt)">8 h/día · 26 días</b> ·
+          Todo el día todos los días = <b style="color:var(--txt)">24 h/día · 30 días</b> ·
+          Solo mañanas L–V = <b style="color:var(--txt)">4 h/día · 22 días</b>
         </div>
         <div>
           <div class="il">Tarifa energía ($/kWh) <span style="font-size:8px;color:var(--mut);font-weight:400">· opcional</span></div>
@@ -306,6 +372,14 @@ select.inp{appearance:none}
         </div>
       </div>
 
+      <!-- POTENCIA MECÁNICA + ADVERTENCIAS -->
+      <div style="background:var(--crd);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;margin-bottom:10px">
+        <div style="font-size:8px;color:var(--mut);margin-bottom:3px">Potencia mecánica útil en el eje</div>
+        <div style="font-size:16px;font-weight:700;color:var(--grn)" id="en-pmec">—</div>
+        <div style="font-size:8px;color:var(--mut);margin-top:2px">P_elec × eficiencia — lo que entrega el motor a la carga</div>
+      </div>
+      <div id="en-wbox" style="display:none;padding:9px 11px;background:rgba(255,183,3,0.07);border:1px solid rgba(255,183,3,0.3);border-radius:10px;font-size:8.5px;color:var(--mut);line-height:1.7;margin-bottom:10px"></div>
+
       <!-- COSTO EN PESOS -->
       <div id="en-bloque-costo" style="display:none">
         <div style="background:rgba(232,64,12,0.07);border:1px solid rgba(232,64,12,0.25);border-radius:10px;padding:12px;margin-bottom:10px">
@@ -330,13 +404,27 @@ select.inp{appearance:none}
         <div class="rr"><div class="rrl">Fórmula aplicada</div><div class="rrv g" id="en-d-formula">—</div></div>
       </div>
 
-      <!-- NOTA -->
-      <div style="padding:8px 10px;background:rgba(46,196,182,0.07);border-left:2px solid var(--grn);border-radius:4px;font-size:8px;color:var(--mut);line-height:1.6;margin-top:4px">
-        <span style="color:var(--grn);font-weight:600">ⓘ Nota: </span>
-        El consumo real puede variar por <b style="color:var(--txt)">variaciones de carga, temperatura y estado del motor</b>.
-        Para medición exacta use un <b style="color:var(--txt)">analizador de redes</b> o <b style="color:var(--txt)">medidor de energía</b> instalado en el circuito.
-        Tarifa de referencia según <b style="color:var(--txt)">CREG y XM</b> — verifique en su factura de energía.
+      <!-- NOTA NORMATIVA -->
+      <div style="padding:8px 10px;background:rgba(46,196,182,0.07);border-left:2px solid var(--grn);border-radius:4px;font-size:8px;color:var(--mut);line-height:1.7;margin-top:4px">
+        <span style="color:var(--grn);font-weight:600">ⓘ Normativa aplicada: </span>
+        Fórmulas según <b style="color:var(--txt)">UPME · NTC-IEC 60034 · RETIE Art.18</b>.
+        Penalización por bajo FP según <b style="color:var(--txt)">CREG Res.024/2005</b>.
+        Tarifa de referencia <b style="color:var(--txt)">CREG y XM 2024</b> — verifique en su factura de energía.
+        Para medición exacta use un <b style="color:var(--txt)">analizador de redes o medidor de energía</b> instalado en el circuito.
       </div>
+
+      <!-- BOTONES PDF ENERGÍA -->
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button onclick="exportarEnergiaPDF('guardar')" style="flex:1;padding:12px;background:transparent;border:1px solid rgba(46,196,182,.35);border-radius:10px;color:var(--grn);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:500;cursor:pointer">
+          💾 Guardar PDF
+        </button>
+        <button onclick="exportarEnergiaPDF('compartir')" style="flex:1;padding:12px;background:transparent;border:1px solid rgba(74,144,217,.35);border-radius:10px;color:#4A90D9;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:500;cursor:pointer">
+          📤 Compartir PDF
+        </button>
+      </div>
+      <button onclick="guardarEnergiaCalculo()" style="width:100%;margin-top:8px;padding:11px;background:transparent;border:1px solid rgba(74,144,217,.35);border-radius:10px;color:#4A90D9;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:500;cursor:pointer">
+        📋 Guardar en historial
+      </button>
 
     </div>
   </div>
@@ -622,7 +710,7 @@ select.inp{appearance:none}
       </div>
     </div>
 
-    <div style="display:flex;gap:8px;margin-bottom:16px">
+    <div style="display:flex;gap:8px;margin-bottom:8px">
       <button onclick="exportarPDF('guardar')" style="flex:1;padding:12px;background:transparent;border:1px solid rgba(46,196,182,.35);border-radius:10px;color:var(--grn);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:500;cursor:pointer">
         💾 Guardar PDF
       </button>
@@ -630,6 +718,9 @@ select.inp{appearance:none}
         📤 Compartir PDF
       </button>
     </div>
+    <button onclick="guardarCalculo()" style="width:100%;margin-bottom:16px;padding:11px;background:transparent;border:1px solid rgba(74,144,217,.35);border-radius:10px;color:#4A90D9;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:500;cursor:pointer">
+      📋 Guardar en historial
+    </button>
   </div>
 </div>
 
@@ -666,17 +757,31 @@ select.inp{appearance:none}
 </div>
 
 <!-- ═══ HISTORIAL ═══ -->
-<div class="screen" id="s-historial">
+<div class="screen" id="s-historial-dol">
   <div class="logo-band"><div class="logo" style="margin-left:10px">Historial<em> DOL</em></div></div>
   <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 0">
-    <span style="font-size:9px;color:var(--mut)" id="hist-count">0 cálculos guardados</span>
-    <button onclick="borrarHistorial()" style="background:transparent;border:1px solid rgba(232,64,12,.35);border-radius:6px;color:var(--pr);font-size:9px;padding:4px 10px;cursor:pointer">🗑 Borrar todo</button>
+    <span style="font-size:9px;color:var(--mut)" id="hist-dol-count">0 cálculos guardados</span>
+    <button onclick="borrarHistorialDOL()" style="background:transparent;border:1px solid rgba(232,64,12,.35);border-radius:6px;color:var(--pr);font-size:9px;padding:4px 10px;cursor:pointer">🗑 Borrar todo</button>
   </div>
-  <div id="hist-list" style="padding:8px 16px 80px"></div>
-  <div id="hist-empty" style="padding:40px 16px;text-align:center;color:var(--mut);font-size:11px">
-    <div style="font-size:32px;margin-bottom:10px">📋</div>
-    <div>No hay cálculos guardados aún.</div>
-    <div style="margin-top:6px;font-size:9px">Cada vez que calcules un motor<br>se guardará automáticamente aquí.</div>
+  <div id="hist-dol-list" style="padding:8px 16px 80px"></div>
+  <div id="hist-dol-empty" style="padding:40px 16px;text-align:center;color:var(--mut);font-size:11px">
+    <div style="font-size:32px;margin-bottom:10px">🔴</div>
+    <div>No hay cálculos DOL guardados.</div>
+    <div style="margin-top:6px;font-size:9px">Usa "Guardar en historial"<br>desde Arranque Directo DOL.</div>
+  </div>
+</div>
+
+<div class="screen" id="s-historial-energia">
+  <div class="logo-band"><div class="logo" style="margin-left:10px">Historial<em> Energía</em></div></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 0">
+    <span style="font-size:9px;color:var(--mut)" id="hist-en-count">0 cálculos guardados</span>
+    <button onclick="borrarHistorialEnergia()" style="background:transparent;border:1px solid rgba(232,64,12,.35);border-radius:6px;color:var(--pr);font-size:9px;padding:4px 10px;cursor:pointer">🗑 Borrar todo</button>
+  </div>
+  <div id="hist-en-list" style="padding:8px 16px 80px"></div>
+  <div id="hist-en-empty" style="padding:40px 16px;text-align:center;color:var(--mut);font-size:11px">
+    <div style="font-size:32px;margin-bottom:10px">⚡</div>
+    <div>No hay cálculos de consumo guardados.</div>
+    <div style="margin-top:6px;font-size:9px">Usa "Guardar en historial"<br>desde Consumo Energético.</div>
   </div>
 </div>
 
@@ -697,7 +802,7 @@ select.inp{appearance:none}
 <div class="nav-bar">
   <div class="ni on" id="n-home" onclick="go('s-home')"><div class="nav-icon">🏠</div><div class="nav-lbl">Inicio</div></div>
 
-  <div class="ni" id="n-hist" onclick="go('s-historial');renderHistorial()"><div class="nav-icon">📋</div><div class="nav-lbl">Historial</div></div>
+  <div class="ni" id="n-hist" onclick="showHistorialMenu()"><div class="nav-icon">📋</div><div class="nav-lbl">Historial</div></div>
   <div class="ni" id="n-norm" onclick="go('s-normas')"><div class="nav-icon">📚</div><div class="nav-lbl">Normas</div></div>
   <div class="ni" id="n-perf" onclick="go('s-perfil')"><div class="nav-icon">👤</div><div class="nav-lbl">Perfil</div></div>
 </div>
@@ -1050,7 +1155,7 @@ function initConexion(){
 }
 
 // ── Navegación ────────────────────────────────────────────────────────────────
-const NM={'s-home':'n-home','s-industrial':'n-home','s-motores':'n-home','s-dol':'n-home','s-conexion':'n-home','s-energia':'n-home','s-historial':'n-hist','s-normas':'n-norm','s-perfil':'n-perf'};
+const NM={'s-home':'n-home','s-industrial':'n-home','s-motores':'n-home','s-dol':'n-home','s-conexion':'n-home','s-energia':'n-home','s-historial-dol':'n-hist','s-historial-energia':'n-hist','s-normas':'n-norm','s-perfil':'n-perf'};
 function go(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
@@ -1513,12 +1618,35 @@ function condDesc(c){
 }
 
 // ── Base de datos local (localStorage) ────────────────────────────────────────
-const DB_KEY = 'electrocol_historial';
+const DB_KEY_DOL = 'electrocol_hist_dol';
+const DB_KEY_EN  = 'electrocol_hist_energia';
 const MAX_HIST = 50;
 
+// Mostrar menú de selección de historial
+function showHistorialMenu(){
+  const dolN  = cargarHistorialDOL().length;
+  const enN   = cargarHistorialEnergia().length;
+  // mini modal de selección
+  const m = document.createElement('div');
+  m.id = 'modal-hist-menu';
+  m.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center';
+  m.innerHTML=`<div style="background:#0D1B2A;border:1px solid rgba(143,163,180,0.25);border-radius:16px;padding:24px 20px;max-width:300px;width:90%;text-align:center">
+    <div style="font-size:22px;margin-bottom:8px">📋</div>
+    <div style="font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:#F0EDE8;margin-bottom:16px">Ver Historial</div>
+    <button onclick="document.getElementById('modal-hist-menu').remove();go('s-historial-dol');renderHistorialDOL()" style="width:100%;margin-bottom:10px;padding:12px;background:rgba(232,64,12,.1);border:1px solid rgba(232,64,12,.4);border-radius:10px;color:#E8400C;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;cursor:pointer">🔴 Arranque DOL <span style="opacity:.7;font-weight:400">(${dolN})</span></button>
+    <button onclick="document.getElementById('modal-hist-menu').remove();go('s-historial-energia');renderHistorialEnergia()" style="width:100%;margin-bottom:16px;padding:12px;background:rgba(74,144,217,.1);border:1px solid rgba(74,144,217,.4);border-radius:10px;color:#4A90D9;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;cursor:pointer">⚡ Consumo Energético <span style="opacity:.7;font-weight:400">(${enN})</span></button>
+    <button onclick="document.getElementById('modal-hist-menu').remove()" style="width:100%;padding:9px;background:transparent;border:1px solid rgba(143,163,180,.3);border-radius:10px;color:#8FA3B4;font-family:'Space Grotesk',sans-serif;font-size:11px;cursor:pointer">Cancelar</button>
+  </div>`;
+  document.body.appendChild(m);
+}
+
+// ── DOL ───────────────────────────────────────────────────────────────────────
+function cargarHistorialDOL(){
+  try { return JSON.parse(localStorage.getItem(DB_KEY_DOL)) || []; } catch(e){ return []; }
+}
 function guardarCalculo(){
   if(!LD.flc) return;
-  const historial = cargarHistorial();
+  const historial = cargarHistorialDOL();
   const nuevo = {
     id: Date.now(),
     fecha: new Date().toLocaleDateString('es-CO'),
@@ -1531,38 +1659,141 @@ function guardarCalculo(){
     empresa: LD.empresa||'', proyecto: LD.proyecto||'',
     fase: FASE, bobina: BOBINA_V,
   };
-  historial.unshift(nuevo); // más reciente primero
+  historial.unshift(nuevo);
   if(historial.length > MAX_HIST) historial.splice(MAX_HIST);
-  localStorage.setItem(DB_KEY, JSON.stringify(historial));
-  showToast('✓ Cálculo guardado en historial');
+  localStorage.setItem(DB_KEY_DOL, JSON.stringify(historial));
+  showToast('✓ Cálculo DOL guardado');
 }
-
-function cargarHistorial(){
-  try { return JSON.parse(localStorage.getItem(DB_KEY)) || []; }
-  catch(e){ return []; }
-}
-
-function borrarHistorial(){
+function borrarHistorialDOL(){
   document.getElementById('modal-borrar').style.display='flex';
+  document.getElementById('modal-borrar').dataset.tipo='dol';
+}
+function borrarCalculo(id){
+  // determinar en qué historial está
+  let h = cargarHistorialDOL();
+  if(h.find(c=>c.id===id)){
+    localStorage.setItem(DB_KEY_DOL, JSON.stringify(h.filter(c=>c.id!==id)));
+    renderHistorialDOL();
+  } else {
+    h = cargarHistorialEnergia().filter(c=>c.id!==id);
+    localStorage.setItem(DB_KEY_EN, JSON.stringify(h));
+    renderHistorialEnergia();
+  }
+  showToast('✓ Cálculo eliminado');
+}
+function renderHistorialDOL(){
+  const historial = cargarHistorialDOL();
+  const list  = document.getElementById('hist-dol-list');
+  const empty = document.getElementById('hist-dol-empty');
+  const count = document.getElementById('hist-dol-count');
+  count.textContent = historial.length + ' cálculo'+(historial.length!==1?'s':'')+' guardado'+(historial.length!==1?'s':'');
+  if(historial.length===0){ list.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  list.innerHTML = historial.map(c=>`
+    <div style="background:var(--crd);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+            <span style="background:rgba(232,64,12,.15);border:1px solid rgba(232,64,12,.4);border-radius:4px;padding:2px 7px;font-size:8px;font-weight:700;color:var(--pr);letter-spacing:.4px">🔴 ARRANQUE DOL</span>
+          </div>
+          <div style="font-size:12px;font-weight:700;color:var(--txt)">${c.pot} ${c.unidad} · ${c.ten}V · ${c.fla}A FLA</div>
+          <div style="font-size:9px;color:var(--mut);margin-top:2px">${c.fecha} ${c.hora} · ${c.tipo||'Trifásico'} · ${c.prot}</div>
+          ${c.empresa?`<div style="font-size:9px;color:var(--acc);margin-top:2px">📁 ${c.empresa}${c.proyecto?' — '+c.proyecto:''}</div>`:''}
+        </div>
+        <button onclick="borrarCalculo(${c.id})" style="background:transparent;border:none;color:var(--pr);font-size:14px;cursor:pointer;padding:0 0 0 8px">✕</button>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+        <span style="background:rgba(232,64,12,.1);border:1px solid rgba(232,64,12,.3);border-radius:4px;padding:2px 7px;font-size:8px;color:var(--pr)">FLC ${c.flc}A</span>
+        <span style="background:rgba(255,183,3,.1);border:1px solid rgba(255,183,3,.3);border-radius:4px;padding:2px 7px;font-size:8px;color:var(--acc)">Breaker ${c.brk}A</span>
+        <span style="background:rgba(46,196,182,.1);border:1px solid rgba(46,196,182,.3);border-radius:4px;padding:2px 7px;font-size:8px;color:var(--grn)">Relé ${c.rele}A</span>
+        <span style="background:rgba(74,144,217,.1);border:1px solid rgba(74,144,217,.3);border-radius:4px;padding:2px 7px;font-size:8px;color:#4A90D9">${c.cal} Cu</span>
+      </div>
+      <button onclick="cargarCalculo(${c.id})" style="width:100%;padding:7px;background:rgba(46,196,182,.1);border:1px solid rgba(46,196,182,.3);border-radius:7px;color:var(--grn);font-size:10px;cursor:pointer;font-family:'Space Grotesk',sans-serif">
+        ↩ Cargar este cálculo
+      </button>
+    </div>`).join('');
+}
+
+// ── ENERGÍA ───────────────────────────────────────────────────────────────────
+function cargarHistorialEnergia(){
+  try { return JSON.parse(localStorage.getItem(DB_KEY_EN)) || []; } catch(e){ return []; }
+}
+function guardarEnergiaCalculo(){
+  const rdiv = document.getElementById('en-rdiv');
+  if(!rdiv || rdiv.style.display==='none'){ showToast('⚠ Primero calcula el consumo del motor'); return; }
+  const historial = cargarHistorialEnergia();
+  const nombre  = document.getElementById('en-titulo-res').textContent.replace('Resultados — ','').trim();
+  const kWtxt   = document.getElementById('en-kw').textContent;
+  const kWhMes  = document.getElementById('en-kwh-mes').textContent;
+  const kWhAnio = document.getElementById('en-kwh-año').textContent;
+  const dTension= document.getElementById('en-d-tension').textContent;
+  const dFla    = document.getElementById('en-d-fla').textContent;
+  const dHoras  = document.getElementById('en-d-horas').textContent;
+  const dDias   = document.getElementById('en-d-dias').textContent;
+  const tieneCosto = document.getElementById('en-bloque-costo').style.display !== 'none';
+  const cMes  = tieneCosto ? document.getElementById('en-c-mes').textContent : '';
+  const nuevo = {
+    id: Date.now(),
+    fecha: new Date().toLocaleDateString('es-CO'),
+    hora: new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}),
+    nombre, kWtxt, kWhMes, kWhAnio, dTension, dFla, dHoras, dDias, cMes,
+  };
+  historial.unshift(nuevo);
+  if(historial.length > MAX_HIST) historial.splice(MAX_HIST);
+  localStorage.setItem(DB_KEY_EN, JSON.stringify(historial));
+  showToast('✓ Consumo guardado en historial');
+}
+function borrarHistorialEnergia(){
+  document.getElementById('modal-borrar').style.display='flex';
+  document.getElementById('modal-borrar').dataset.tipo='energia';
 }
 function modalConfirmarBorrar(si){
-  document.getElementById('modal-borrar').style.display='none';
+  const modal = document.getElementById('modal-borrar');
+  const tipo = modal.dataset.tipo;
+  modal.style.display='none';
   if(si){
-    localStorage.removeItem(DB_KEY);
-    renderHistorial();
+    if(tipo==='energia'){
+      localStorage.removeItem(DB_KEY_EN);
+      renderHistorialEnergia();
+    } else {
+      localStorage.removeItem(DB_KEY_DOL);
+      renderHistorialDOL();
+    }
     showToast('✓ Historial borrado');
   }
 }
 
-function borrarCalculo(id){
-  const h = cargarHistorial().filter(c=>c.id!==id);
-  localStorage.setItem(DB_KEY, JSON.stringify(h));
-  renderHistorial();
-  showToast('✓ Cálculo eliminado');
+function renderHistorialEnergia(){
+  const historial = cargarHistorialEnergia();
+  const list  = document.getElementById('hist-en-list');
+  const empty = document.getElementById('hist-en-empty');
+  const count = document.getElementById('hist-en-count');
+  count.textContent = historial.length + ' cálculo'+(historial.length!==1?'s':'')+' guardado'+(historial.length!==1?'s':'');
+  if(historial.length===0){ list.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  list.innerHTML = historial.map(c=>`
+    <div style="background:var(--crd);border:1px solid rgba(74,144,217,.35);border-radius:10px;padding:10px 12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+            <span style="background:rgba(74,144,217,.18);border:1px solid rgba(74,144,217,.45);border-radius:4px;padding:2px 7px;font-size:8px;font-weight:700;color:#4A90D9;letter-spacing:.4px">⚡ CONSUMO POR MOTOR</span>
+          </div>
+          <div style="font-size:12px;font-weight:700;color:var(--txt)">${c.nombre}</div>
+          <div style="font-size:9px;color:var(--mut);margin-top:2px">${c.fecha} ${c.hora} · ${c.dTension}</div>
+        </div>
+        <button onclick="borrarCalculo(${c.id})" style="background:transparent;border:none;color:var(--pr);font-size:14px;cursor:pointer;padding:0 0 0 8px">✕</button>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span style="background:rgba(232,64,12,.1);border:1px solid rgba(232,64,12,.3);border-radius:4px;padding:2px 7px;font-size:8px;color:var(--pr)">${c.kWtxt}</span>
+        <span style="background:rgba(46,196,182,.1);border:1px solid rgba(46,196,182,.3);border-radius:4px;padding:2px 7px;font-size:8px;color:var(--grn)">${c.kWhMes} / mes</span>
+        <span style="background:rgba(74,144,217,.1);border:1px solid rgba(74,144,217,.3);border-radius:4px;padding:2px 7px;font-size:8px;color:#4A90D9">${c.dHoras} · ${c.dDias}</span>
+        ${c.cMes?`<span style="background:rgba(255,183,3,.1);border:1px solid rgba(255,183,3,.3);border-radius:4px;padding:2px 7px;font-size:8px;color:var(--acc)">💰 ${c.cMes}/mes</span>`:''}
+      </div>
+    </div>`).join('');
 }
 
 function cargarCalculo(id){
-  const c = cargarHistorial().find(h=>h.id===id);
+  const c = cargarHistorialDOL().find(h=>h.id===id);
   if(!c) return;
   // Restaurar valores en el formulario
   document.getElementById('dp').value = c.pot;
@@ -1596,10 +1827,37 @@ function renderHistorial(){
   }
   empty.style.display='none';
 
-  list.innerHTML = historial.map(c=>`
+  list.innerHTML = historial.map(c=>{
+    if(c.tipo_modulo === 'energia'){
+      // ── Tarjeta Consumo Energético ──
+      return `
+    <div style="background:var(--crd);border:1px solid rgba(74,144,217,.35);border-radius:10px;padding:10px 12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+            <span style="background:rgba(74,144,217,.18);border:1px solid rgba(74,144,217,.45);border-radius:4px;padding:2px 7px;font-size:8px;font-weight:700;color:#4A90D9;letter-spacing:.4px">⚡ CONSUMO POR MOTOR</span>
+          </div>
+          <div style="font-size:12px;font-weight:700;color:var(--txt)">${c.nombre}</div>
+          <div style="font-size:9px;color:var(--mut);margin-top:2px">${c.fecha} ${c.hora} · ${c.dTension}</div>
+        </div>
+        <button onclick="borrarCalculo(${c.id})" style="background:transparent;border:none;color:var(--pr);font-size:14px;cursor:pointer;padding:0 0 0 8px">✕</button>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+        <span style="background:rgba(232,64,12,.1);border:1px solid rgba(232,64,12,.3);border-radius:4px;padding:2px 7px;font-size:8px;color:var(--pr)">${c.kWtxt}</span>
+        <span style="background:rgba(46,196,182,.1);border:1px solid rgba(46,196,182,.3);border-radius:4px;padding:2px 7px;font-size:8px;color:var(--grn)">${c.kWhMes} / mes</span>
+        <span style="background:rgba(74,144,217,.1);border:1px solid rgba(74,144,217,.3);border-radius:4px;padding:2px 7px;font-size:8px;color:#4A90D9">${c.dHoras} · ${c.dDias}</span>
+        ${c.cMes?`<span style="background:rgba(255,183,3,.1);border:1px solid rgba(255,183,3,.3);border-radius:4px;padding:2px 7px;font-size:8px;color:var(--acc)">💰 ${c.cMes}/mes</span>`:''}
+      </div>
+    </div>`;
+    } else {
+      // ── Tarjeta Arranque Directo DOL ──
+      return `
     <div style="background:var(--crd);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-        <div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+            <span style="background:rgba(232,64,12,.15);border:1px solid rgba(232,64,12,.4);border-radius:4px;padding:2px 7px;font-size:8px;font-weight:700;color:var(--pr);letter-spacing:.4px">🔴 ARRANQUE DOL</span>
+          </div>
           <div style="font-size:12px;font-weight:700;color:var(--txt)">${c.pot} ${c.unidad} · ${c.ten}V · ${c.fla}A FLA</div>
           <div style="font-size:9px;color:var(--mut);margin-top:2px">${c.fecha} ${c.hora} · ${c.tipo||'Trifásico'} · ${c.prot}</div>
           ${c.empresa?`<div style="font-size:9px;color:var(--acc);margin-top:2px">📁 ${c.empresa}${c.proyecto?' — '+c.proyecto:''}</div>`:''}
@@ -1615,12 +1873,13 @@ function renderHistorial(){
       <button onclick="cargarCalculo(${c.id})" style="width:100%;padding:7px;background:rgba(46,196,182,.1);border:1px solid rgba(46,196,182,.3);border-radius:7px;color:var(--grn);font-size:10px;cursor:pointer;font-family:'Space Grotesk',sans-serif">
         ↩ Cargar este cálculo
       </button>
-    </div>
-  `).join('');
+    </div>`;
+    }
+  }).join('');
 }
 
 // Cargar historial al inicio y configurar UI inicial
-window.addEventListener('load', ()=>{ renderHistorial(); setFase('tri'); });
+window.addEventListener('load', ()=>{ setFase('tri'); });
 
 function limpiar(){
   ['dp','df','drpm','d-dist','dempresa','dproyecto'].forEach(id=>document.getElementById(id).value='');
@@ -2368,8 +2627,7 @@ function _buildPDF(){
       }
     } else {
       _download(url,fname);
-      guardarCalculo(); // guardar en historial al descargar PDF
-      showToast('✓ PDF guardado y registrado en historial');
+      showToast('✓ PDF guardado');
     }
   } catch(e){
     console.error('PDF error:',e);
@@ -2500,10 +2758,25 @@ function setEnFase(v){
   if(v==='mono' && sel.value==='440') sel.value='220';
 }
 
+function selFp(val){
+  const input = document.getElementById('en-fp');
+  if(val === 'custom'){
+    input.style.display = 'block';
+    input.value = '';
+    input.focus();
+  } else {
+    input.style.display = 'none';
+    input.value = val;
+  }
+}
+
 function calcularEnergia(){
   const fla    = parseFloat(document.getElementById('en-fla').value);
   const v      = parseFloat(document.getElementById('en-tension').value);
-  const fp     = parseFloat(document.getElementById('en-fp').value)    || 0.85;
+  const fpSel  = document.getElementById('en-fp-sel').value;
+  const fp     = fpSel === 'custom'
+    ? parseFloat(document.getElementById('en-fp').value) || 0.85
+    : parseFloat(fpSel) || 0.85;
   const eff    = parseFloat(document.getElementById('en-eff').value)   || 90;
   const carga  = parseFloat(document.getElementById('en-carga').value) || 100;
   const horas  = parseFloat(document.getElementById('en-horas').value);
@@ -2515,50 +2788,112 @@ function calcularEnergia(){
     showToast('⚠ Ingresa Tensión, FLA y Horas/día');
     return;
   }
-
-  // Potencia eléctrica consumida por el motor (kW)
-  // Trifásico: P = √3 × V × I × cos(φ) × (carga/100) / 1000
-  // Monofásico: P = V × I × cos(φ) × (carga/100) / 1000
-  let kW;
-  if(EN_FASE === 'tri'){
-    kW = +(Math.sqrt(3) * v * fla * fp * (carga/100) / 1000).toFixed(3);
-  } else {
-    kW = +(v * fla * fp * (carga/100) / 1000).toFixed(3);
+  if(fp < 0.3 || fp > 1.0){
+    showToast('⚠ cos(φ) debe estar entre 0.30 y 1.00');
+    return;
+  }
+  if(eff < 50 || eff > 99){
+    showToast('⚠ Eficiencia debe estar entre 50% y 99%');
+    return;
   }
 
-  // kWh
-  const kWhDia  = +(kW * horas).toFixed(2);
-  const kWhMes  = +(kWhDia * dias).toFixed(1);
-  const kWhAño  = +(kWhMes * 12).toFixed(0);
+  // ── FÓRMULAS NORMATIVA COLOMBIANA ─────────────────────────────────────────
+  // Fuente: UPME, NTC-IEC 60034, RETIE Art.18
+  //
+  // Potencia eléctrica de entrada (kW) — lo que consume el motor de la red:
+  //   Trifásico:  P_elec = √3 × V × I_FLA × cos(φ) × (%carga/100) / 1000
+  //   Monofásico: P_elec = V × I_FLA × cos(φ) × (%carga/100) / 1000
+  //
+  // Nota: I_FLA ya representa la corriente a plena carga. El factor (%carga/100)
+  // escala linealmente la corriente real de operación respecto al FLA nominal.
+  //
+  // Potencia mecánica útil en el eje (kW):
+  //   P_mec = P_elec × (η/100)
+  //
+  // Consumo energético:
+  //   kWh_dia = P_elec × horas
+  //   kWh_mes = kWh_dia × dias
+  //   kWh_año = kWh_mes × 12
 
-  // Mostrar resultados
+  const factCarga = carga / 100;
+  let kWElec;
+  if(EN_FASE === 'tri'){
+    kWElec = Math.sqrt(3) * v * fla * fp * factCarga / 1000;
+  } else {
+    kWElec = v * fla * fp * factCarga / 1000;
+  }
+  kWElec = +kWElec.toFixed(3);
+
+  // Potencia mecánica útil en el eje
+  const kWMec = +(kWElec * eff / 100).toFixed(3);
+
+  // Consumo energético
+  const kWhDia = +(kWElec * horas).toFixed(2);
+  const kWhMes = +(kWhDia * dias).toFixed(1);
+  const kWhAño = +(kWhMes * 12).toFixed(0);
+
+  // Nombre del tipo cos(φ) seleccionado
+  const fpSelEl = document.getElementById('en-fp-sel');
+  const fpNombre = fpSel === 'custom'
+    ? 'Personalizado'
+    : fpSelEl.options[fpSelEl.selectedIndex].text.split('—')[0].trim();
+
+  // ── MOSTRAR RESULTADOS ────────────────────────────────────────────────────
   document.getElementById('en-titulo-res').textContent = 'Resultados — ' + nombre;
-  document.getElementById('en-kw').textContent       = kW + ' kW';
-  document.getElementById('en-kwh-dia').textContent  = kWhDia + ' kWh';
-  document.getElementById('en-kwh-mes').textContent  = kWhMes + ' kWh';
-  document.getElementById('en-kwh-año').textContent  = kWhAño + ' kWh';
+  document.getElementById('en-kw').textContent         = kWElec + ' kW';
+  document.getElementById('en-kwh-dia').textContent    = kWhDia + ' kWh';
+  document.getElementById('en-kwh-mes').textContent    = kWhMes + ' kWh';
+  document.getElementById('en-kwh-año').textContent    = kWhAño + ' kWh';
 
-  // Detalle técnico
-  document.getElementById('en-d-tension').textContent  = v + ' V · ' + (EN_FASE==='tri' ? 'Trifásico' : 'Monofásico');
-  document.getElementById('en-d-fla').textContent      = fla + ' A';
-  document.getElementById('en-d-fp').textContent       = fp;
-  document.getElementById('en-d-eff').textContent      = eff + '%';
-  document.getElementById('en-d-carga').textContent    = carga + '%';
-  document.getElementById('en-d-horas').textContent    = horas + ' h';
-  document.getElementById('en-d-dias').textContent     = dias + ' días';
-  const formula = EN_FASE==='tri'
-    ? '√3 × ' + v + 'V × ' + fla + 'A × ' + fp + ' × ' + carga + '% ÷ 1000'
-    : v + 'V × ' + fla + 'A × ' + fp + ' × ' + carga + '% ÷ 1000';
-  document.getElementById('en-d-formula').textContent  = formula + ' = ' + kW + ' kW';
+  // Potencia mecánica
+  const elPmec = document.getElementById('en-pmec');
+  if(elPmec) elPmec.textContent = kWMec + ' kW  (' + (kWMec/0.7457).toFixed(2) + ' HP)';
 
-  // Costo en pesos
+  // ── DETALLE TÉCNICO ───────────────────────────────────────────────────────
+  document.getElementById('en-d-tension').textContent = v + ' V · ' + (EN_FASE==='tri' ? 'Trifásico 3Ø' : 'Monofásico 1Ø');
+  document.getElementById('en-d-fla').textContent     = fla + ' A  (corriente plena carga — placa)';
+  document.getElementById('en-d-fp').textContent      = fp + '  (' + fpNombre + ')';
+  document.getElementById('en-d-eff').textContent     = eff + '%';
+  document.getElementById('en-d-carga').textContent   = carga + '%  (I_real ≈ ' + +(fla * factCarga).toFixed(2) + ' A)';
+  document.getElementById('en-d-horas').textContent   = horas + ' h/día';
+  document.getElementById('en-d-dias').textContent    = dias + ' días/mes';
+
+  const raiz = EN_FASE==='tri' ? '√3 × ' : '';
+  const formula = raiz + v + ' V × ' + fla + ' A × ' + fp + ' × ' + carga + '% ÷ 1000 = ' + kWElec + ' kW';
+  document.getElementById('en-d-formula').textContent = formula;
+
+  // ── ADVERTENCIAS NORMATIVA COLOMBIANA ────────────────────────────────────
+  const warns = [];
+
+  // CREG Res.024/2005 — penalización por bajo FP en usuarios industriales
+  if(fp < 0.9){
+    warns.push('⚠ cos(φ) = ' + fp + ' está por debajo de 0.9 — <b style="color:var(--txt)">la CREG Res.024/2005</b> establece penalización en la factura para usuarios industriales. Considerar banco de condensadores.');
+  }
+
+  // Advertencia sobrecarga
+  if(carga > 100){
+    warns.push('⚠ Motor operando en sobrecarga (' + carga + '%) — verificar dimensionamiento y temperatura del bobinado. RETIE Art.18 exige protección térmica adecuada.');
+  }
+
+  // Advertencia motor muy subcargado (< 50%) — ineficiencia energética UPME
+  if(carga < 50){
+    warns.push('ⓘ Motor operando por debajo del 50% de su capacidad — motor sobredimensionado según criterios UPME. Evaluar reemplazo por motor de menor potencia para mejorar eficiencia energética.');
+  }
+
+  const wbox = document.getElementById('en-wbox');
+  if(wbox){
+    wbox.innerHTML = warns.join('<br><br>');
+    wbox.style.display = warns.length ? 'block' : 'none';
+  }
+
+  // ── COSTO EN PESOS COLOMBIANOS ────────────────────────────────────────────
   const bloqueCosto = document.getElementById('en-bloque-costo');
   if(tarifa > 0){
-    const fmt = n => '$' + Math.round(n).toLocaleString('es-CO');
+    const fmt = n => '$ ' + Math.round(n).toLocaleString('es-CO');
     document.getElementById('en-c-dia').textContent    = fmt(kWhDia * tarifa);
     document.getElementById('en-c-mes').textContent    = fmt(kWhMes * tarifa);
     document.getElementById('en-c-año').textContent    = fmt(kWhAño * tarifa);
-    document.getElementById('en-c-tarifa').textContent = '$' + tarifa.toLocaleString('es-CO') + ' / kWh';
+    document.getElementById('en-c-tarifa').textContent = '$' + tarifa.toLocaleString('es-CO') + ' /kWh';
     bloqueCosto.style.display = 'block';
   } else {
     bloqueCosto.style.display = 'none';
@@ -2568,6 +2903,98 @@ function calcularEnergia(){
   rdiv.style.display = 'block';
   setTimeout(()=>rdiv.scrollIntoView({behavior:'smooth', block:'start'}), 120);
   showToast('✓ Consumo calculado');
+}
+
+// ── Calculadora de Eficiencia — 3 métodos ────────────────────────────────────
+// Tabla IEC 60034-30-1 eficiencia nominal a plena carga 60Hz 4 polos (%)
+const EFF_IE = {
+  IE1: {1:80.0, 2:81.5, 3:82.7, 5:85.0, 7.5:86.5, 10:87.5, 15:88.5, 20:89.5, 25:90.0, 30:90.5, 40:91.0, 50:91.5},
+  IE2: {1:84.0, 2:86.5, 3:87.5, 5:89.5, 7.5:90.4, 10:91.1, 15:91.8, 20:92.4, 25:92.8, 30:93.2, 40:93.6, 50:93.9},
+  IE3: {1:85.5, 2:88.5, 3:89.5, 5:91.7, 7.5:92.4, 10:92.4, 15:93.0, 20:93.6, 25:94.0, 30:94.5, 40:94.8, 50:95.0},
+  IE4: {1:88.0, 2:90.5, 3:91.5, 5:93.0, 7.5:93.8, 10:94.0, 15:94.8, 20:95.0, 25:95.3, 30:95.5, 40:95.8, 50:96.0},
+};
+
+let EFF_TAB = 1; // tab activo
+let _effIeVal = null, _effMedVal = null;
+
+function setEffTab(n){
+  EFF_TAB = n;
+  [1,2,3].forEach(i=>{
+    const tab = document.getElementById('eff-tab-'+i);
+    const pnl = document.getElementById('eff-m'+i);
+    const on  = i===n;
+    tab.style.background  = on ? 'rgba(46,196,182,0.2)' : 'transparent';
+    tab.style.color       = on ? 'var(--grn)' : 'var(--mut)';
+    tab.style.borderColor = on ? 'rgba(46,196,182,0.5)' : 'var(--bd)';
+    pnl.style.display     = on ? 'block' : 'none';
+  });
+}
+
+function calcEffIE(){
+  const clase = document.getElementById('eff-ie-clase').value;
+  const pot   = parseFloat(document.getElementById('eff-ie-pot').value);
+  const res   = document.getElementById('eff-ie-result');
+  if(!clase || !pot){ res.style.display='none'; _effIeVal=null; return; }
+
+  const tbl = EFF_IE[clase];
+  // Buscar la potencia más cercana en la tabla
+  const keys = Object.keys(tbl).map(Number);
+  const near = keys.reduce((a,b) => Math.abs(b-pot)<Math.abs(a-pot)?b:a);
+  const eff  = tbl[near];
+  _effIeVal  = eff;
+
+  const descs = {IE1:'Eficiencia estándar — motor económico o antiguo',IE2:'Alta eficiencia — más común en Colombia',IE3:'Eficiencia premium — motor industrial nuevo',IE4:'Super premium — clase alta industrial'};
+  document.getElementById('eff-ie-val').textContent  = eff + '%';
+  document.getElementById('eff-ie-desc').textContent = clase + ' · ' + pot + ' HP · ' + (descs[clase]||'');
+  res.style.display = 'block';
+}
+
+function calcEffMed(){
+  const hp = parseFloat(document.getElementById('eff-med-hp').value);
+  const v  = parseFloat(document.getElementById('eff-med-v').value);
+  const i  = parseFloat(document.getElementById('eff-med-i').value);
+  const fp = parseFloat(document.getElementById('eff-med-fp').value) || 0.85;
+  const res = document.getElementById('eff-med-result');
+  if(!hp || !v || !i){ res.style.display='none'; _effMedVal=null; return; }
+
+  // Potencia eléctrica entrada (kW)
+  const pElec = EN_FASE==='tri'
+    ? Math.sqrt(3) * v * i * fp / 1000
+    : v * i * fp / 1000;
+  // Potencia mecánica salida (kW) = HP × 0.7457
+  const pMec = hp * 0.7457;
+  const eff  = +(pMec / pElec * 100).toFixed(1);
+  const effC = Math.min(Math.max(eff, 50), 99);
+  _effMedVal = effC;
+
+  let estado = '';
+  if(effC < 80)       estado = 'Motor en mal estado o sobredimensionado — verificar';
+  else if(effC < 87)  estado = 'Eficiencia baja — probable IE1 o motor desgastado';
+  else if(effC < 92)  estado = 'Eficiencia normal — rango IE2';
+  else                estado = 'Eficiencia alta — rango IE3 o IE4';
+
+  document.getElementById('eff-med-val').textContent  = effC + '%';
+  document.getElementById('eff-med-desc').textContent = 'P.elec: '+pElec.toFixed(2)+' kW · P.mec: '+pMec.toFixed(2)+' kW · '+estado;
+  res.style.display = 'block';
+}
+
+function aplicarEff(metodo){
+  let val = null;
+  if(metodo==='ie'){
+    val = _effIeVal;
+    if(!val){ showToast('⚠ Selecciona clase IE y potencia'); return; }
+  } else if(metodo==='med'){
+    val = _effMedVal;
+    if(!val){ showToast('⚠ Ingresa HP, tensión y corriente'); return; }
+  } else if(metodo==='antig'){
+    const sel = document.querySelector('input[name="eff-antig"]:checked');
+    if(!sel){ showToast('⚠ Selecciona el período del motor'); return; }
+    val = parseFloat(sel.value);
+  }
+  if(val){
+    document.getElementById('en-eff').value = val;
+    showToast('✓ Eficiencia aplicada: ' + val + '%');
+  }
 }
 
 function calcCargaPinza(){
@@ -2623,15 +3050,446 @@ function aplicarCargaPinza(){
 }
 
 function limpiarEnergia(){
-  ['en-fla','en-fp','en-eff','en-carga','en-horas','en-dias','en-tarifa','en-nombre','en-pinza']
+  ['en-fla','en-fp','en-eff','en-carga','en-horas','en-dias','en-tarifa','en-nombre','en-pinza','eff-ie-clase','eff-ie-pot','eff-med-hp','eff-med-v','eff-med-i','fp-kw','fp-kva','fp-med-w','fp-med-v','fp-med-i','fp-fac-kwh','fp-fac-kvah']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('en-pinza-result').style.display='none';
+  const ieR=document.getElementById('eff-ie-result'); if(ieR) ieR.style.display='none';
+  const mR=document.getElementById('eff-med-result'); if(mR) mR.style.display='none';
+  document.querySelectorAll('input[name="eff-antig"]').forEach(r=>r.checked=false);
+  _effIeVal=null; _effMedVal=null;
   document.getElementById('en-fp').value    = '0.85';
+  document.getElementById('en-fp').style.display = 'none';
+  document.getElementById('en-fp-sel').value = '0.85';
   document.getElementById('en-eff').value   = '90';
   document.getElementById('en-carga').value = '100';
   document.getElementById('en-dias').value  = '26';
   document.getElementById('en-rdiv').style.display = 'none';
   showToast('✓ Formulario limpiado');
+}
+
+// ── PDF Consumo Energético ────────────────────────────────────────────────────
+let _enPdfModo = 'guardar';
+
+function exportarEnergiaPDF(modo='guardar'){
+  _enPdfModo = modo;
+  const rdiv = document.getElementById('en-rdiv');
+  if(!rdiv || rdiv.style.display==='none'){
+    showToast('⚠ Primero calcula el consumo del motor');
+    return;
+  }
+  if(typeof window.jspdf==='undefined'){
+    showToast('⏳ Cargando generador PDF...');
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload=()=>setTimeout(_buildEnergiaPDF,300);
+    s.onerror=()=>showToast('⚠ Sin internet para generar PDF');
+    document.head.appendChild(s);
+    return;
+  }
+  showToast('⏳ Generando PDF energía...');
+  setTimeout(_buildEnergiaPDF,150);
+}
+
+function _buildEnergiaPDF(){
+  try{
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const W=210, ML=14, MR=14, U=W-ML-MR;
+    const PH=297; // altura página A4
+    const FOOT=10; // espacio reservado footer
+    const fecha=new Date().toLocaleDateString('es-CO');
+
+    // ── Colores ───────────────────────────────────────────────────────────────
+    const PR='#E8400C',GRN='#2EC4B6',BLU='#4A90D9',ACC='#FFB703';
+    const MUT='#8FA3B4',DRK='#0D1B2A',TXT='#1A2F47',LGT='#F4F7FA';
+
+    // ── Leer DOM ──────────────────────────────────────────────────────────────
+    const clean = s => String(s||'')
+      .replace(/√3/g,'1.732').replace(/√/g,'sqrt')
+      .replace(/×/g,'x')
+      .replace(/·/g,'x')
+      .replace(/÷/g,'/')
+      .replace(/[—–]/g,'-')
+      .replace(/≈/g,'~')
+      .replace(/≤/g,'<=')
+      .replace(/≥/g,'>=')
+      .replace(/°/g,'deg')
+      .replace(/[φΦϕ]/g,'fi')
+      .replace(/[Øø]/g,'O')
+      .replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i')
+      .replace(/ó/g,'o').replace(/ú/g,'u').replace(/ñ/g,'n')
+      .replace(/Á/g,'A').replace(/É/g,'E').replace(/Í/g,'I')
+      .replace(/Ó/g,'O').replace(/Ú/g,'U').replace(/Ñ/g,'N')
+      .replace(/ü/g,'u').replace(/Ü/g,'U')
+      .split('').filter(c=>c.charCodeAt(0)<128).join('')
+
+    const nombre   = clean(document.getElementById('en-titulo-res').textContent.replace(/Resultados\s*[—\-]\s*/,'').trim());
+    const kWtxt    = clean(document.getElementById('en-kw').textContent);
+    const kWDia    = clean(document.getElementById('en-kwh-dia').textContent);
+    const kWMes    = clean(document.getElementById('en-kwh-mes').textContent);
+    const kWAnio   = clean(document.getElementById('en-kwh-año').textContent);
+    const pmecEl   = document.getElementById('en-pmec');
+    const pmec     = clean(pmecEl ? pmecEl.textContent : '—');
+    const dTension = clean(document.getElementById('en-d-tension').textContent);
+    const dFla     = clean(document.getElementById('en-d-fla').textContent);
+    const dFp      = clean(document.getElementById('en-d-fp').textContent);
+    const dEff     = clean(document.getElementById('en-d-eff').textContent);
+    const dCarga   = clean(document.getElementById('en-d-carga').textContent);
+    const dHoras   = clean(document.getElementById('en-d-horas').textContent);
+    const dDias    = clean(document.getElementById('en-d-dias').textContent);
+    const dForm    = clean(document.getElementById('en-d-formula').textContent);
+
+    const tieneCosto = document.getElementById('en-bloque-costo').style.display !== 'none';
+    const cDia  = tieneCosto ? clean(document.getElementById('en-c-dia').textContent)  : '';
+    const cMes  = tieneCosto ? clean(document.getElementById('en-c-mes').textContent)  : '';
+    const cAnio = tieneCosto ? clean(document.getElementById('en-c-año').textContent)  : '';
+    const cTar  = tieneCosto ? clean(document.getElementById('en-c-tarifa').textContent) : '';
+
+    const tieneWarn = document.getElementById('en-wbox') && document.getElementById('en-wbox').style.display!=='none';
+    const warnTxt   = tieneWarn ? clean(document.getElementById('en-wbox').innerText) : '';
+
+    // Valores numéricos para gráficas
+    const kW     = parseFloat(kWtxt)  || 0;
+    const kwDia  = parseFloat(kWDia)  || 0;
+    const kwMes  = parseFloat(kWMes)  || 0;
+    const kwAnio = parseFloat(kWAnio) || 0;
+    const pMecVal= parseFloat(pmec)   || 0;
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function rg(h){h=h||'#888888';return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+    function fc(h){if(h)doc.setFillColor(...rg(h));}
+    function dc(h){if(h)doc.setDrawColor(...rg(h));}
+    function tc(h){if(h)doc.setTextColor(...rg(h));}
+    function tx(x,y,s,col,sz,al,bo){
+      doc.setFontSize(sz||9); doc.setFont('helvetica',bo?'bold':'normal');
+      tc(col||TXT); doc.text(String(s||''),x,y,{align:al||'left'});
+    }
+    function bx(x,y,w,h,fill,stroke,r){
+      doc.setLineWidth(0.25);
+      if(fill)fc(fill); if(stroke)dc(stroke);
+      const m=fill&&stroke?'FD':fill?'F':'S';
+      if(w>0&&h>0){ r ? doc.roundedRect(x,y,w,h,r,r,m) : doc.rect(x,y,w,h,m); }
+    }
+    function ln(x1,y1,x2,y2,col,lw){dc(col||MUT);doc.setLineWidth(lw||0.25);doc.line(x1,y1,x2,y2);}
+
+    // Encabezado de sección
+    function sh(yy,title,col){
+      bx(ML,yy,U,7,col||DRK,null,2);
+      tx(ML+3,yy+5,title,'#F0EDE8',9,'left',true);
+      return yy+10;
+    }
+
+    // Nueva página si no cabe el bloque
+    function checkPage(yy, needed){
+      if(yy + needed > PH - FOOT - 5){
+        doc.addPage();
+        return 12;
+      }
+      return yy;
+    }
+
+    let y=10;
+
+    // ── ENCABEZADO ─────────────────────────────────────────────────────────────
+    bx(ML,y,U,44,DRK,null,3);
+    bx(ML,y,3,40,PR,null,0);
+    bx(ML+3,y+38,U-3,6,'#162840',null,0);
+
+    doc.setFontSize(22); doc.setFont('helvetica','bold');
+    const eW=doc.getTextWidth('ELECTRO');
+    tx(ML+7,y+11,'ELECTRO','#F0EDE8',22,'left',true);
+    tx(ML+7+eW,y+11,'COL',PR,22,'left',true);
+    tx(ML+7,y+17,'Informe de Consumo Energetico de Motor  |  UPME - NTC-IEC 60034 - RETIE','#8FA3B4',6.5);
+    tx(ML+7,y+23,nombre,'#F0EDE8',10,'left',true);
+    tx(ML+7,y+28,'Calculadora de Consumo por Motor - Colombia 60Hz','#B0C8DC',8);
+    tx(W-MR-2,y+23,'Fecha: '+fecha,'#8FA3B4',7,'right');
+    tx(W-MR-2,y+28,dTension,'#8FA3B4',7,'right');
+
+    const badges=[['UPME','#2EC4B6'],['NTC-IEC 60034','#1A4A6E'],['RETIE Art.18','#6A2C0E'],['CREG','#4A3A00']];
+    let bx2=ML+7;
+    badges.forEach(([lbl,bc])=>{
+      const bw=doc.getStringUnitWidth(lbl)*6.5*0.35+6;
+      bx(bx2,y+39,bw,4,bc,null,1.5);
+      tx(bx2+bw/2,y+42.5,lbl,'#FFFFFF',6,'center',true);
+      bx2+=bw+3;
+    });
+    y+=48;
+
+    // ── SECCIÓN 1: DATOS DE ENTRADA ────────────────────────────────────────────
+    y=checkPage(y,60);
+    y=sh(y,'1.  Datos de Entrada del Motor');
+    const entradas=[
+      ['Equipo / Motor',nombre],
+      ['Tension de operacion',dTension],
+      ['Corriente FLA (placa)',dFla],
+      ['Factor de potencia cos(fi)',dFp],
+      ['Eficiencia del motor',dEff],
+      ['Carga de operacion',dCarga],
+      ['Horas de trabajo',dHoras],
+      ['Dias de trabajo',dDias],
+    ];
+    const cw1=[U*0.40,U*0.60];
+    const rowH=5.8;
+    // Cabecera tabla
+    let rx=ML;
+    ['Parametro','Valor'].forEach((h,ci)=>{
+      bx(rx,y,cw1[ci],rowH,DRK,null);
+      tx(rx+2,y+rowH-1.5,h,'#FFFFFF',7.5,'left',true);
+      rx+=cw1[ci];
+    });
+    y+=rowH;
+    const tableTop=y;
+    entradas.forEach((row,ri)=>{
+      const bg=ri%2===0?'#FFFFFF':LGT;
+      rx=ML;
+      row.forEach((cell,ci)=>{
+        bx(rx,y,cw1[ci],rowH,bg,null);
+        const col=ci===0?TXT:BLU;
+        const lines=doc.splitTextToSize(String(cell),cw1[ci]-4);
+        tx(rx+2,y+rowH-1.5,lines[0],col,8,'left',ci===0);
+        rx+=cw1[ci];
+      });
+      y+=rowH;
+    });
+    dc('#C8D4E0'); doc.setLineWidth(0.3);
+    doc.rect(ML,tableTop-rowH,U,entradas.length*rowH+rowH);
+    // líneas verticales
+    ln(ML+cw1[0],tableTop-rowH,ML+cw1[0],y,'#C8D4E0');
+    y+=5;
+
+    // ── SECCIÓN 2: RESULTADOS ENERGÉTICOS ─────────────────────────────────────
+    y=checkPage(y,55);
+    y=sh(y,'2.  Resultados de Consumo Energetico',PR);
+    const cardH=20, cardW=U/2-2;
+    const cards=[
+      {l:'Potencia real consumida', v:kWtxt, n:'P = sqrt3 x V x I x cos(fi) x %carga', c:PR},
+      {l:'Potencia mecanica util',  v:pmec,  n:'P_mec = P_elec x Eficiencia',           c:GRN},
+      {l:'Consumo diario',          v:kWDia, n:'P_elec [kW] x horas/dia',               c:ACC},
+      {l:'Consumo mensual',         v:kWMes, n:'kWh/dia x dias/mes',                    c:BLU},
+    ];
+    cards.forEach((card,i)=>{
+      const cx=ML+(i%2)*(cardW+4);
+      const cy=y+Math.floor(i/2)*(cardH+4);
+      bx(cx,cy,cardW,cardH,LGT,'#D0DCE8',2);
+      dc(card.c); doc.setLineWidth(0.8); doc.line(cx,cy,cx,cy+cardH);
+      tx(cx+4,cy+6,  card.l,'#8FA3B4',7);
+      tx(cx+4,cy+13, card.v, card.c, 12,'left',true);
+      tx(cx+4,cy+18, card.n,'#8FA3B4',5.5);
+    });
+    y+=cardH*2+8;
+
+    // Card anual — ancho completo
+    y=checkPage(y,16);
+    bx(ML,y,U,13,DRK,null,2);
+    dc(PR); doc.setLineWidth(0.8); doc.line(ML,y,ML,y+13);
+    tx(ML+4,y+5,'Consumo anual total','#8FA3B4',7);
+    tx(ML+4,y+11,kWAnio+' / año',PR,12,'left',true);
+    tx(W-MR-3,y+7,'kWh/mes x 12 meses','#8FA3B4',6.5,'right');
+    y+=17;
+
+    // ── SECCIÓN 3: GRÁFICA DE BARRAS ──────────────────────────────────────────
+    y=checkPage(y,70);
+    y=sh(y,'3.  Grafica de Consumo — Proyeccion Anual','#1A3A5C');
+
+    const barData=[
+      {label:'Diario',     val:kwDia,                      col:ACC},
+      {label:'Semanal',    val:+(kwDia*5).toFixed(1),       col:BLU},
+      {label:'Mensual',    val:kwMes,                       col:GRN},
+      {label:'Trimestral', val:+(kwMes*3).toFixed(0),       col:'#8E44AD'},
+      {label:'Semestral',  val:+(kwMes*6).toFixed(0),       col:'#E67E22'},
+      {label:'Anual',      val:kwAnio,                      col:PR},
+    ];
+    const maxVal=Math.max(...barData.map(b=>b.val),0.1);
+    const gX=ML+22, gW=U-26, gH=44, gY=y+4;
+    const barW=Math.floor(gW/barData.length)-5;
+
+    bx(ML,y,U,gH+16,LGT,'#D0DCE8',2);
+
+    // Líneas guía + etiquetas eje Y
+    [0.25,0.5,0.75,1.0].forEach(frac=>{
+      const gy2=gY+gH-frac*gH;
+      ln(gX,gy2,gX+gW,gy2,'#D8E4EE',0.2);
+      const lv=frac*maxVal;
+      const ls=lv>=1000?(lv/1000).toFixed(1)+'k':lv.toFixed(1);
+      tx(gX-2,gy2+1,ls,'#8FA3B4',4.5,'right');
+    });
+
+    // Barras
+    barData.forEach((b,i)=>{
+      const bh=Math.max(+(b.val/maxVal*gH).toFixed(1),1);
+      const bxPos=gX+i*(barW+5);
+      const byPos=gY+gH-bh;
+      // sombra suave
+      fc('#C8D0DA'); doc.rect(bxPos+0.8,byPos+0.8,barW,bh,'F');
+      // barra
+      fc(b.col); doc.rect(bxPos,byPos,barW,bh,'F');
+      // valor encima
+      const vs=b.val>=1000?(b.val/1000).toFixed(1)+'k':b.val.toFixed(1);
+      tx(bxPos+barW/2,byPos-1.5,vs,'#1A2F47',4.5,'center',true);
+      // etiqueta abajo
+      tx(bxPos+barW/2,gY+gH+5,b.label,'#8FA3B4',4.5,'center');
+    });
+
+    tx(ML+3,gY+gH/2,'kWh','#8FA3B4',5.5,'left');
+    y+=gH+20;
+
+    // ── SECCIÓN 4: DISTRIBUCIÓN ENERGÉTICA (tabla, no donut) ──────────────────
+    y=checkPage(y,52);
+    y=sh(y,'4.  Balance Energetico del Motor','#0A2218');
+
+    const pPerd   =+(kW-pMecVal).toFixed(3);
+    const pMecPct =kW>0?+((pMecVal/kW)*100).toFixed(1):0;
+    const pPerdPct=kW>0?+((pPerd/kW)*100).toFixed(1):0;
+
+    // Barra de distribución horizontal
+    const distW=U, distH=10;
+    const mechW=distW*(pMecPct/100);
+    bx(ML,y,mechW>0?mechW:0,distH,GRN,null,0);
+    bx(ML+(mechW>0?mechW:0),y,distW-(mechW>0?mechW:0),distH,'#D0D0D0',null,0);
+    tx(ML+mechW/2,y+6.5,pMecPct+'%','#FFFFFF',7,'center',true);
+    if(pPerdPct>5) tx(ML+mechW+(distW-mechW)/2,y+6.5,pPerdPct+'%','#555555',7,'center',true);
+    y+=distH+3;
+
+    // Tabla de balance
+    const balRows=[
+      [GRN,  'Potencia mecanica util',   pMecPct+'%',  pMecVal+' kW'],
+      ['#C0C0C0','Perdidas termicas',     pPerdPct+'%', pPerd+' kW'],
+      [BLU,  'Potencia electrica total', '100%',        kW+' kW  (entrada red)'],
+    ];
+    balRows.forEach((row,ri)=>{
+      const bg=ri%2===0?'#FFFFFF':LGT;
+      bx(ML,y,U,7,bg,null);
+      ln(ML,y,ML+U,y,'#D0DCE8',0.2);
+      fc(row[0]); doc.rect(ML+2,y+2,3,3,'F');
+      tx(ML+7,y+4.8,row[1],TXT,8);
+      tx(ML+U*0.52,y+4.8,row[2],TXT,8,'left',true);
+      tx(ML+U*0.68,y+4.8,row[3],BLU,8);
+      y+=7;
+    });
+    dc('#C8D4E0'); doc.setLineWidth(0.3); doc.rect(ML,y-21,U,21);
+    y+=5;
+
+    // ── SECCIÓN 5: COSTOS (si tiene tarifa) ────────────────────────────────────
+    if(tieneCosto){
+      y=checkPage(y,58);
+      y=sh(y,'5.  Proyeccion de Costos en Pesos Colombianos (COP)','#4A1B0C');
+
+      const costCards=[
+        {l:'Costo diario',  v:cDia,  c:ACC},
+        {l:'Costo mensual', v:cMes,  c:GRN},
+        {l:'Costo anual',   v:cAnio, c:PR},
+        {l:'Tarifa usada',  v:cTar,  c:MUT},
+      ];
+      const ccW=U/2-2;
+      const ccH=18;
+      costCards.forEach((card,i)=>{
+        const ccx=ML+(i%2)*(ccW+4);
+        const ccy=y+Math.floor(i/2)*(ccH+4);
+        bx(ccx,ccy,ccW,ccH,LGT,'#D0DCE8',2);
+        dc(card.c); doc.setLineWidth(0.8); doc.line(ccx,ccy,ccx,ccy+ccH);
+        tx(ccx+4,ccy+7, card.l,'#8FA3B4',7);
+        tx(ccx+4,ccy+14,card.v, card.c,10,'left',true);
+      });
+      y+=ccH*2+10;
+
+      // Gráfica de barras de costos (Dia / Mes / Anual)
+      y=checkPage(y,52);
+      const costoNum=[
+        {l:'Diario',  v:parseFloat((cDia||'').replace(/[^0-9.]/g,''))  ||0, c:ACC},
+        {l:'Mensual', v:parseFloat((cMes||'').replace(/[^0-9.]/g,''))  ||0, c:GRN},
+        {l:'Anual',   v:parseFloat((cAnio||'').replace(/[^0-9.]/g,'')) ||0, c:PR},
+      ];
+      const maxC=Math.max(...costoNum.map(c=>c.v),0.1);
+      const cgH=32, cgX=ML+24, cgW=U-28, cgY=y+4;
+      bx(ML,y,U,cgH+14,LGT,'#D0DCE8',2);
+      tx(ML+U/2,y+3,'Resumen de costos (COP)',TXT,7,'center',true);
+      const cbW=Math.floor(cgW/costoNum.length)-8;
+      costoNum.forEach((c,i)=>{
+        const ch=Math.max(+(c.v/maxC*cgH).toFixed(1),1);
+        const cbx=cgX+i*(cbW+8);
+        const cby=cgY+cgH-ch;
+        fc('#C8D0DA'); doc.rect(cbx+0.8,cby+0.8,cbW,ch,'F');
+        fc(c.col); doc.rect(cbx,cby,cbW,ch,'F');
+        const cv=c.v>=1000000?'$'+(c.v/1000000).toFixed(1)+'M':c.v>=1000?'$'+(c.v/1000).toFixed(0)+'k':'$'+c.v;
+        tx(cbx+cbW/2,cby-1.5,cv,'#1A2F47',4.5,'center',true);
+        tx(cbx+cbW/2,cgY+cgH+5,c.l,'#8FA3B4',4.5,'center');
+      });
+      y+=cgH+18;
+    }
+
+    // ── SECCIÓN NORMATIVA ──────────────────────────────────────────────────────
+    const normNum = tieneCosto ? '6' : '5';
+    y=checkPage(y,52);
+    y=sh(y,normNum+'.  Formula y Normativa Aplicada','#2C4A6E');
+
+    const normRows=[
+      ['Formula aplicada', dForm],
+      ['Norma calculo energia','UPME - NTC-IEC 60034 - RETIE Art.18'],
+      ['Penalizacion bajo FP','CREG Resolucion 024/2005 - FP < 0.9'],
+      ['Tarifas de referencia','CREG y XM 2024 - verificar en factura'],
+      ['Frecuencia red','60 Hz - Colombia'],
+    ];
+    const nTop=y;
+    normRows.forEach((row,ri)=>{
+      const bg=ri%2===0?'#FFFFFF':LGT;
+      bx(ML,y,cw1[0],rowH,bg,null);
+      bx(ML+cw1[0],y,cw1[1],rowH,bg,null);
+      ln(ML,y,ML+U,y,'#D0DCE8',0.2);
+      tx(ML+2,y+rowH-1.5,row[0],TXT,7.5,'left',true);
+      const vlines=doc.splitTextToSize(row[1],cw1[1]-4);
+      tx(ML+cw1[0]+2,y+rowH-1.5,vlines[0],BLU,7.5);
+      y+=rowH;
+    });
+    dc('#C8D4E0'); doc.setLineWidth(0.3);
+    doc.rect(ML,nTop,U,normRows.length*rowH);
+    ln(ML+cw1[0],nTop,ML+cw1[0],y,'#C8D4E0');
+    y+=4;
+
+    // Advertencias
+    if(tieneWarn && warnTxt){
+      const lineH=5;
+      const wLines=doc.splitTextToSize(warnTxt.replace(/\n/g,' '),U-14);
+      const wH=10+wLines.length*lineH+5; // título(10) + líneas + margen inferior(5)
+      y=checkPage(y,wH+4);
+      bx(ML,y,U,wH,'#FAEEDA','#FFB703',2);
+      tx(ML+4,y+7,'ADVERTENCIAS NORMATIVAS',ACC,7.5,'left',true);
+      wLines.forEach((l,i)=>tx(ML+4,y+13+i*lineH,l,TXT,7.5));
+      y+=wH+4;
+    }
+
+    // ── FOOTER ─────────────────────────────────────────────────────────────────
+    const footY=PH-8;
+    ln(ML,footY-2,W-MR,footY-2,'#C8D8E8',0.3);
+    tx(W/2,footY,'ElectroCol  |  Consumo Energetico  |  '+nombre+'  |  '+fecha,'#8FA3B4',6,'center');
+
+    // Número de páginas
+    const totalPages=doc.getNumberOfPages();
+    for(let p=1;p<=totalPages;p++){
+      doc.setPage(p);
+      tx(W-MR,footY,'Pag '+p+'/'+totalPages,'#8FA3B4',6,'right');
+    }
+
+    // ── GUARDAR / COMPARTIR ────────────────────────────────────────────────────
+    const fname='ElectroCol_Energia_'+nombre.replace(/\s/g,'_')+'.pdf';
+    const blob=doc.output('blob');
+    const url=URL.createObjectURL(blob);
+    if(_enPdfModo==='compartir'){
+      const canShare=navigator.share&&navigator.canShare&&navigator.canShare({files:[new File([blob],fname,{type:'application/pdf'})]});
+      if(canShare){
+        navigator.share({files:[new File([blob],fname,{type:'application/pdf'})],title:'ElectroCol Energia'}).catch(()=>_download(url,fname));
+        showToast('Compartiendo PDF...');
+      } else {
+        _download(url,fname);
+        showToast('Descargando PDF...');
+      }
+    } else {
+      _download(url,fname);
+      showToast('✓ PDF guardado');
+    }
+  } catch(e){
+    console.error('PDF energia error:',e);
+    showToast('Error generando PDF: '+e.message);
+  }
 }
 
 // ── Service Worker ─────────────────────────────────────────────────────────────
